@@ -4,7 +4,7 @@
 
 ### Your development context, saved.
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&pause=1000&color=3B82F6&center=true&vCenter=true&width=850&lines=Git+saves+your+code.;DevCheckpoint+saves+the+context+around+your+code.;Stop.+Switch.+Resume.+Without+losing+your+flow." alt="Typing SVG" />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&pause=1000&color=3B82F6&center=true&vCenter=true&width=850&lines=Git+saves+your+code.;DevCheckpoint+saves+the+context+around+your+code.;Stop.+Switch.+Resume.+Without+losing+your+flow." alt="DevCheckpoint typing animation" />
 
 <br/>
 
@@ -21,6 +21,8 @@ what changed, what broke, what you already tried, and what you should do next.**
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 <br/>
+
+### Git saves your code. DevCheckpoint saves the context around your code.
 
 </div>
 
@@ -56,7 +58,7 @@ What was I planning to do next?
 
 It creates a structured checkpoint of your current development state so you can return later and continue without reconstructing your entire mental context.
 
-> ### Git saves your code. DevCheckpoint saves your working context.
+> **Think of DevCheckpoint as a save-state system for software development.**
 
 ---
 
@@ -72,17 +74,15 @@ You have already:
 - modified middleware
 - discovered that signature verification is still failing
 
-Then an urgent production issue appears.
+Then an urgent issue appears.
 
 You switch tasks.
 
-Three hours later, you return.
+A few hours later, you return.
 
-Git shows the files you changed.
+Git shows you the files you changed, but the reasoning behind those changes is no longer immediately available.
 
-But the reasoning behind those changes is gone.
-
-You now spend another 15–30 minutes rebuilding the context in your head.
+You now have to rebuild the entire context in your head.
 
 DevCheckpoint is designed to eliminate that restart cost.
 
@@ -98,7 +98,7 @@ flowchart LR
     D["💾 Save Checkpoint"]
     E["🌿 Collect Git Context"]
     F["🔐 Sanitize Context"]
-    G["🤖 Local AI Summary"]
+    G["🤖 Local AI"]
     H["🗄️ Save Locally"]
     I["▶ Resume Development"]
 
@@ -112,13 +112,11 @@ flowchart LR
     H --> I
 ```
 
-The current interactive demo already supports the core workflow without requiring the AI layer to be complete.
+The current interactive demo already supports the main workflow, while the local AI layer is being integrated next.
 
 ---
 
 # ✨ What DevCheckpoint Captures
-
-A checkpoint can preserve:
 
 | Context | Example |
 |---|---|
@@ -137,51 +135,49 @@ A checkpoint can preserve:
 
 # 🖥️ Product Preview
 
-> Add approved DevCheckpoint screenshots inside `docs/assets/` or `design/references/` and update the paths below.
-
 <div align="center">
 
-### Dashboard
+## Dashboard
 
-<img src="devcheckpoint/design/references/dashboard.png" width="900" alt="DevCheckpoint Dashboard" /> width="900" alt="DevCheckpoint Dashboard"/>
-
-<br/><br/>
-
-### Project Workspace
-
-<img src="design/references/project-workspace.png" width="900" alt="DevCheckpoint Project Workspace"/>
+<img src="devcheckpoint/design/references/dashboard.png" width="900" alt="DevCheckpoint Dashboard" />
 
 <br/><br/>
 
-### Save Checkpoint
+## Project Workspace
 
-<img src="design/references/save-checkpoint.png" width="900" alt="Save Checkpoint"/>
+<img src="devcheckpoint/design/references/project-workspace.png" width="900" alt="DevCheckpoint Project Workspace" />
 
 <br/><br/>
 
-### Resume Development
+## Save Checkpoint
 
-<img src="design/references/resume-task.png" width="900" alt="Resume Development"/>
+<img src="devcheckpoint/design/references/save-checkpoint.png" width="900" alt="DevCheckpoint Save Checkpoint" />
+
+<br/><br/>
+
+## Resume Development
+
+<img src="devcheckpoint/design/references/resume-task.png" width="900" alt="DevCheckpoint Resume Development" />
 
 </div>
 
 ---
 
-# 🚀 Current Demo Features
+# 🚀 Current Features
 
-## ✅ Working
+## 📁 Local Repository Selection
 
-### 📁 Local Repository Selection
+DevCheckpoint provides a native desktop folder picker for selecting a local Git repository.
 
-DevCheckpoint can open a native folder picker and allow the developer to choose a local repository.
-
-It validates whether the selected directory is a real Git repository before registering it.
+The selected directory is validated before being added as a project.
 
 ---
 
-### 🌿 Real Git Context
+## 🌿 Real Git Context
 
-Using read-only Git integration, DevCheckpoint can collect:
+DevCheckpoint reads useful Git information directly from the selected repository.
+
+It can currently collect:
 
 ```text
 Repository name
@@ -191,20 +187,21 @@ Modified files
 Staged files
 Added files
 Deleted files
-Per-file changes
-Git diff
+Insertion / deletion counts
+Per-file diffs
 Recent commits
 ```
 
-Git access is intentionally **read-only**.
+Git integration is intentionally **read-only**.
 
-DevCheckpoint does not automatically:
+DevCheckpoint does not automatically execute:
 
 ```text
 commit
 push
 pull
 checkout
+switch
 reset
 merge
 rebase
@@ -214,9 +211,11 @@ clean
 
 ---
 
-### 🎯 Task Management
+## 🎯 Task Management
 
-Developers can create tasks containing:
+Developers can create and manage tasks connected to a project.
+
+A task can contain:
 
 ```text
 Title
@@ -228,7 +227,7 @@ Status
 Timestamps
 ```
 
-Supported statuses:
+Supported statuses include:
 
 ```text
 ACTIVE
@@ -238,102 +237,110 @@ COMPLETED
 
 ---
 
-### 💾 Local Checkpoints
+## 💾 Development Checkpoints
 
-A developer can save their current working state.
+Developers can save their current development state as a checkpoint.
 
-A checkpoint records:
+A checkpoint can preserve:
 
 ```text
-Task
+Task information
 Project
-Branch
+Current branch
 Git status
 Changed files
 Git diff
 Recent commits
-Developer note
+Developer notes
 Timestamp
 ```
 
-The checkpoint is persisted locally.
+Everything is persisted locally.
 
 ---
 
-### ▶ Resume Development
+## ▶ Resume Development
 
-A developer can return later and load the latest checkpoint for a task.
-
-The current demo supports:
+The goal is simple:
 
 ```text
-Add Repository
-      ↓
+Select Repository
+       ↓
 Start Task
-      ↓
-Modify Code
-      ↓
+       ↓
+Work
+       ↓
 Save Checkpoint
-      ↓
+       ↓
 Close DevCheckpoint
-      ↓
-Open DevCheckpoint Again
-      ↓
-Resume Task
+       ↓
+Return Later
+       ↓
+Resume Development
 ```
+
+Instead of reconstructing what happened, the developer can immediately continue from the latest saved context.
 
 ---
 
-### 🤝 Developer Handoffs
+# 🤝 Developer Handoffs
 
-DevCheckpoint can generate a structured handoff from saved task context.
+DevCheckpoint can also turn task context into a developer handoff.
 
 Example:
 
 ```text
-Task:
+Task
 Fix Stripe webhook verification
 
-Branch:
+Branch
 feature/stripe-webhook
 
-Current state:
+Current state
 Webhook endpoint is receiving requests.
 
-Problem:
+Blocker
 Stripe signature verification is failing.
 
-Relevant files:
+Already tried
+- Updated webhook secret
+- Checked Stripe request headers
+- Tested raw request handling
+
+Important files
 - webhook.ts
 - stripe.ts
 - middleware.ts
 
-Developer note:
-Need to verify whether middleware changes the raw request body.
+Next step
+Verify whether middleware modifies the raw request body.
 ```
 
-This can later be expanded into richer team collaboration.
+This makes it easier to transfer unfinished work between developers without writing the same context manually.
 
 ---
 
 # 🤖 Local AI Layer
 
-The planned intelligence layer runs locally using:
+DevCheckpoint is designed to use **local AI**, rather than requiring code context to be sent to a cloud AI provider.
 
 <div align="center">
 
 ![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-111827?style=for-the-badge)
+
 ![Qwen](https://img.shields.io/badge/Qwen-Coding%20Model-7C3AED?style=for-the-badge)
-![Zod](https://img.shields.io/badge/Zod-Validation-3068B7?style=for-the-badge)
+
+![Zod](https://img.shields.io/badge/Zod-Structured%20Validation-3068B7?style=for-the-badge)
 
 </div>
 
-The intended AI pipeline is:
+The intended pipeline is:
 
 ```mermaid
 flowchart TD
+
     A["Task Context"]
-    B["Git Context"]
+    B["Git Changes"]
     C["Developer Notes"]
     D["Errors / Attempts"]
 
@@ -345,13 +352,13 @@ flowchart TD
     E --> F["🔐 Secret Sanitizer"]
     F --> G["Context Formatter"]
     G --> H["Ollama"]
-    H --> I["Qwen Coding Model"]
+    H --> I["Qwen"]
     I --> J["Structured JSON"]
     J --> K["Zod Validation"]
-    K --> L["SQLite Checkpoint"]
+    K --> L["SQLite"]
 ```
 
-The model will return structured data similar to:
+The model is designed to produce structured context such as:
 
 ```json
 {
@@ -377,48 +384,58 @@ The model will return structured data similar to:
 
 # 🔐 Privacy & Local-First
 
-DevCheckpoint is designed around one major principle:
+DevCheckpoint follows a simple principle:
 
-> **Your code should not need to leave your computer just to remember what you were doing.**
+> **Your development context should not need to leave your computer just to help you remember what you were doing.**
 
-The architecture is local-first.
+The application is designed around local processing.
 
 ### Local by default
 
 - Repository analysis happens locally
 - Git operations happen locally
 - Checkpoints are stored locally
-- SQLite is stored in the OS application-data directory
-- AI is designed to run through local Ollama
+- SQLite stores application data locally
+- AI is designed to run through Ollama
+- Qwen runs locally
 - No cloud AI is required for the MVP
-- No telemetry is required
 
-### Sensitive data protection
+---
 
-DevCheckpoint is designed to exclude or redact:
+## Sensitive Data Protection
+
+DevCheckpoint is designed to exclude sensitive files such as:
 
 ```text
 .env
 .env.*
 *.pem
 *.key
+id_rsa
+id_ed25519
+credentials.json
+secrets.*
 SSH keys
 Private keys
-API keys
-Access tokens
-Refresh tokens
-Passwords
-Database credentials
-Credential files
 ```
 
-Sensitive values are intended to become:
+Sensitive patterns such as:
+
+```text
+API_KEY=
+SECRET=
+TOKEN=
+PASSWORD=
+PRIVATE_KEY=
+```
+
+are intended to be converted to:
 
 ```text
 [REDACTED]
 ```
 
-before they are passed into an AI context package.
+before AI processing.
 
 ---
 
@@ -438,33 +455,31 @@ flowchart TB
     GIT["Git Context Service"]
     CHECKPOINT["Checkpoint Service"]
     SECURITY["Secret Sanitizer"]
-    AI["AI Service"]
+    AI["Local AI Service"]
 
     SQLITE["SQLite + Prisma"]
     OLLAMA["Ollama"]
     QWEN["Qwen"]
     FS["Local Filesystem"]
-    GITREPO["Git Repository"]
+    REPO["Local Git Repository"]
 
     DEV --> UI
-
-    UI --> TAURI
 
     UI --> PROJECT
     UI --> TASK
     UI --> CHECKPOINT
+    UI --> TAURI
 
     PROJECT --> SQLITE
     TASK --> SQLITE
     CHECKPOINT --> SQLITE
 
     TAURI --> FS
-    TAURI --> GITREPO
+    GIT --> REPO
 
-    GIT --> GITREPO
     CHECKPOINT --> GIT
-
     CHECKPOINT --> SECURITY
+
     SECURITY --> AI
 
     AI --> OLLAMA
@@ -480,28 +495,36 @@ flowchart TB
 ![Tauri](https://img.shields.io/badge/Tauri-FFC131?style=flat-square&logo=tauri&logoColor=black)
 ![Rust](https://img.shields.io/badge/Rust-000000?style=flat-square&logo=rust&logoColor=white)
 
+---
+
 ## Frontend
 
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js)
 ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
-![Tailwind](https://img.shields.io/badge/Tailwind-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+
+---
 
 ## Database
 
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white)
 
-## Developer Context
+---
+
+## Git
 
 ![Git](https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white)
 
 ```text
-simple-git
 Git CLI
+simple-git
 ```
 
-## AI
+---
+
+## Local AI
 
 ```text
 Ollama
@@ -514,53 +537,59 @@ Zod
 # 📂 Project Structure
 
 ```text
-devcheckpoint/
+DevCheckpoint-CortexCrafters/
 │
-├── src/
-│   │
-│   ├── app/
-│   │   ├── projects/
-│   │   ├── tasks/
-│   │   ├── checkpoints/
-│   │   ├── handoffs/
-│   │   ├── analytics/
-│   │   └── settings/
-│   │
-│   ├── components/
-│   │   ├── layout/
-│   │   ├── projects/
-│   │   ├── tasks/
-│   │   ├── checkpoints/
-│   │   ├── handoffs/
-│   │   ├── git/
-│   │   └── ui/
-│   │
-│   └── lib/
-│       ├── actions/
-│       ├── git/
-│       ├── context/
-│       └── db/
+├── README.md
 │
-├── prisma/
-│   ├── schema.prisma
-│   └── migrations/
-│
-├── src-tauri/
-│   ├── src/
-│   ├── capabilities/
-│   └── tauri.conf.json
-│
-├── design/
-├── docs/
-│
-├── ARCHITECTURE.md
-├── AGENT_RULES.md
-└── package.json
+└── devcheckpoint/
+    │
+    ├── src/
+    │   │
+    │   ├── app/
+    │   │   ├── projects/
+    │   │   ├── tasks/
+    │   │   ├── checkpoints/
+    │   │   ├── handoffs/
+    │   │   ├── analytics/
+    │   │   └── settings/
+    │   │
+    │   ├── components/
+    │   │   ├── layout/
+    │   │   ├── projects/
+    │   │   ├── tasks/
+    │   │   ├── checkpoints/
+    │   │   ├── git/
+    │   │   ├── handoffs/
+    │   │   └── ui/
+    │   │
+    │   └── lib/
+    │       ├── actions/
+    │       ├── git/
+    │       ├── context/
+    │       └── db/
+    │
+    ├── prisma/
+    │   ├── schema.prisma
+    │   └── migrations/
+    │
+    ├── src-tauri/
+    │   ├── src/
+    │   ├── capabilities/
+    │   └── tauri.conf.json
+    │
+    ├── design/
+    ├── docs/
+    │
+    ├── ARCHITECTURE.md
+    ├── AGENT_RULES.md
+    └── package.json
 ```
 
 ---
 
 # 🗄️ Core Data Model
+
+DevCheckpoint's data model is centered around projects, tasks and checkpoints.
 
 ```mermaid
 erDiagram
@@ -596,75 +625,82 @@ erDiagram
     }
 ```
 
+The larger architecture also supports concepts such as:
+
+```text
+Project
+Task
+Checkpoint
+ChangedFile
+CommandLog
+ErrorLog
+Handoff
+Settings
+```
+
 ---
 
 # 🎨 Design Philosophy
 
-DevCheckpoint uses a premium dark developer interface inspired by the quality and restraint of modern developer products.
+DevCheckpoint is designed as a serious developer tool rather than a generic AI dashboard.
 
-The design principles are:
+The visual direction focuses on:
 
 ```text
-Linear-level density
-Vercel-level restraint
-GitHub-level familiarity
-IDE-level technical clarity
+Dense developer-focused interface
+Dark charcoal surfaces
+Clear information hierarchy
+Minimal visual noise
+Readable Git diffs
+Fast navigation
+Consistent desktop workspace
 ```
 
-The application intentionally avoids looking like a generic AI chatbot.
+The product takes inspiration from the quality and restraint of tools such as:
 
-AI is a supporting layer.
+```text
+Linear
+Vercel
+GitHub
+Modern IDEs
+```
 
-The development workflow remains the primary interface.
+while maintaining its own interface and workflow.
 
 ---
 
 # 🧪 Example Use Case
 
-### Before interruption
+A developer is working on authentication.
+
+Before being interrupted:
 
 ```text
-Task:
+Task
 Fix authentication refresh flow
 
-Problem:
+Problem
 Refresh token returns 401 after access token expiry
 
-Already tried:
+Already tried
 - Changed JWT expiry
 - Checked refresh endpoint
 - Verified token generation
 
-Important files:
+Important files
 - auth.ts
 - jwt.ts
 - middleware.ts
 
-Next:
+Next step
 Inspect cookie SameSite configuration
 ```
 
-Developer clicks:
+They save a checkpoint.
 
-```text
-Save Checkpoint
-```
+Hours later they open DevCheckpoint and resume.
 
-Then switches to another issue.
-
----
-
-### Several hours later
-
-Developer opens DevCheckpoint.
-
-Clicks:
-
-```text
-Resume Development
-```
-
-And immediately gets:
+Instead of reconstructing everything, the saved state immediately shows:
 
 ```text
 You were fixing refresh-token authentication.
@@ -684,22 +720,22 @@ Next step:
 Inspect cookie SameSite / Secure configuration.
 ```
 
-No reconstruction required.
-
 ---
 
 # 🗺️ Roadmap
 
-### Phase 1 — Foundation
+## Phase 1 — Foundation
 
 - [x] Product architecture
 - [x] Technical requirements
 - [x] UI/UX system
 - [x] Tauri desktop shell
 - [x] Next.js application
-- [x] SQLite / Prisma
+- [x] SQLite / Prisma integration
 
-### Phase 2 — Core Developer Workflow
+---
+
+## Phase 2 — Developer Workflow
 
 - [x] Local repository selection
 - [x] Git repository validation
@@ -708,50 +744,76 @@ No reconstruction required.
 - [x] Changed files
 - [x] Git diff
 - [x] Recent commits
-- [x] Task management
+- [x] Task creation
+- [x] Task status management
 
-### Phase 3 — Checkpoints
+---
+
+## Phase 3 — Checkpoints
 
 - [x] Raw checkpoint capture
 - [x] Local persistence
-- [x] Resume Development
-- [x] Basic handoff generation
+- [x] Resume Development flow
+- [x] Basic developer handoffs
 
-### Phase 4 — Local Intelligence
+---
+
+## Phase 4 — Local Intelligence
 
 - [ ] Secret sanitizer
-- [ ] Ollama runtime integration
+- [ ] Ollama integration
 - [ ] Qwen checkpoint summaries
-- [ ] Structured Zod validation
-- [ ] AI-generated blockers / attempts / next steps
+- [ ] Structured JSON validation
+- [ ] AI-generated blocker analysis
+- [ ] AI-generated next steps
 
-### Phase 5 — Automation
+---
+
+## Phase 5 — Context Automation
 
 - [ ] Lightweight file monitoring
 - [ ] Error context capture
 - [ ] Command history capture
 - [ ] Smarter context prioritization
 
-### Phase 6 — Platform & Polish
+---
+
+## Phase 6 — Platform & Polish
 
 - [ ] macOS validation
-- [ ] Windows packaging
-- [ ] macOS packaging
+- [ ] Windows production packaging
+- [ ] macOS production packaging
 - [ ] Search across checkpoints
-- [ ] Performance improvements
+- [ ] Performance optimization
 - [ ] Accessibility review
 
 ---
 
 # 🏆 Hackathon Track
 
-### Track 3 — Developer Tooling
+## Track 3 — Developer Tooling
 
-**Subtrack:** Workflow & Context Management
+### Subtrack: Workflow & Context Management
 
-The challenge focuses on tools that reduce developer context switching and help developers stay productive inside complex development environments.
+DevCheckpoint addresses developer context switching by providing a persistent memory layer around active development tasks.
 
-DevCheckpoint approaches that problem by creating a persistent memory layer around development tasks.
+Instead of replacing existing tools, it connects the information developers already generate while working.
+
+```text
+Git
++
+Tasks
++
+Notes
++
+Errors
++
+Attempts
++
+Local AI
+=
+Development Memory
+```
 
 ---
 
@@ -761,17 +823,17 @@ DevCheckpoint is **not**:
 
 ```text
 ❌ A replacement for Git
+
 ❌ A replacement for GitHub
+
 ❌ Another IDE
+
 ❌ Another code-generation chatbot
+
 ❌ A fully autonomous coding agent
 ```
 
-It complements tools developers already use.
-
-Think of it as:
-
-> **A save-state system for software development.**
+It complements the developer's existing workflow.
 
 ---
 
@@ -779,25 +841,27 @@ Think of it as:
 
 Software development contains a huge amount of temporary knowledge.
 
-Most of it never reaches:
+Most of that information never reaches:
 
 ```text
-Git
+Git commits
 Documentation
 Tickets
 Pull requests
-Comments
+Code comments
 ```
 
-It exists temporarily inside the developer's head.
+It exists temporarily in the developer's head.
 
-DevCheckpoint turns that temporary context into a reusable development state.
+When context is lost, developers spend time rebuilding it.
+
+DevCheckpoint converts that temporary context into a reusable development state.
 
 ---
 
 # 🔮 Future Vision
 
-DevCheckpoint can eventually become a broader **developer context layer** that works across:
+DevCheckpoint can evolve into a broader **developer context layer** connecting tools such as:
 
 ```text
 VS Code
@@ -805,26 +869,40 @@ Cursor
 Claude Code
 GitHub
 GitLab
-Jira
 Linear
+Jira
 Terminal
-CI/CD
+CI/CD systems
 Local AI models
 ```
 
-A future developer should be able to say:
+A future workflow could be as simple as:
 
 ```text
 Resume the payment bug I was working on Tuesday.
 ```
 
-and immediately recover the entire relevant working state.
+DevCheckpoint could restore:
+
+```text
+The task
+The branch
+Changed files
+Relevant commits
+Previous errors
+Attempts already made
+Important files
+Developer notes
+Recommended next action
+```
 
 ---
 
 # 🧑‍💻 Running Locally
 
 ## Requirements
+
+Make sure the machine has:
 
 ```text
 Node.js 22+
@@ -833,10 +911,9 @@ Git
 Rust
 Cargo
 Tauri prerequisites
-SQLite
 ```
 
-Optional for upcoming AI features:
+Optional for upcoming local AI functionality:
 
 ```text
 Ollama
@@ -845,11 +922,13 @@ Qwen coding model
 
 ---
 
-## Clone
+## Clone the Repository
 
 ```bash
 git clone https://github.com/ananyaa0204/DevCheckpoint-CortexCrafters.git
 ```
+
+Enter the application directory:
 
 ```bash
 cd DevCheckpoint-CortexCrafters/devcheckpoint
@@ -857,7 +936,7 @@ cd DevCheckpoint-CortexCrafters/devcheckpoint
 
 ---
 
-## Install dependencies
+## Install Dependencies
 
 ```bash
 pnpm install
@@ -865,7 +944,7 @@ pnpm install
 
 ---
 
-## Run the web frontend
+## Run the Frontend
 
 ```bash
 pnpm dev
@@ -873,21 +952,21 @@ pnpm dev
 
 ---
 
-## Run the desktop application
+## Run the Desktop Application
 
 ```bash
 pnpm tauri dev
 ```
 
-The first Tauri compilation may take longer because Rust dependencies must be compiled.
+The first Tauri build can take longer because Rust dependencies need to compile.
 
 ---
 
 # 🔒 Git Safety
 
-DevCheckpoint currently treats Git repositories as **read-only context sources**.
+Git repositories are treated as **read-only context sources**.
 
-Allowed operations include:
+Examples of operations DevCheckpoint may use:
 
 ```bash
 git status
@@ -897,17 +976,60 @@ git diff --cached
 git log
 ```
 
-DevCheckpoint does not automatically execute destructive repository commands.
+DevCheckpoint does not automatically perform destructive Git operations.
 
 ---
 
-# 🤝 Team
+# 💾 Local Data
+
+DevCheckpoint stores application data locally using:
+
+```text
+SQLite
++
+Prisma
+```
+
+The database is designed to live inside the operating system's application-data directory rather than inside the user's repository.
+
+This keeps DevCheckpoint metadata separate from project source code.
+
+---
+
+# 🌍 Cross-Platform Architecture
+
+DevCheckpoint is being built with cross-platform compatibility in mind.
+
+The architecture avoids hardcoded paths such as:
+
+```text
+C:\Users\...
+```
+
+or:
+
+```text
+/Users/...
+```
+
+Instead, platform-safe path handling and Tauri APIs are used.
+
+Primary targets:
+
+```text
+Windows
+macOS
+```
+
+---
+
+# 👥 Team
 
 <div align="center">
 
-## CortexCrafters
+## 🧠 CortexCrafters
 
-Building a better way for developers to stop, switch and resume without losing context.
+### Building a better way for developers to stop, switch and resume without losing context.
 
 </div>
 
@@ -917,13 +1039,7 @@ Building a better way for developers to stop, switch and resume without losing c
 
 This project is licensed under the **MIT License**.
 
-See:
-
-```text
-LICENSE
-```
-
-for details.
+See the `LICENSE` file for more information.
 
 ---
 
@@ -931,14 +1047,16 @@ for details.
 
 <br/>
 
-## ⚡ DevCheckpoint
+# ⚡ DevCheckpoint
 
-### Stop coding. Switch tasks. Come back without starting over.
+### Stop. Switch. Resume.
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=500&size=18&pause=1200&color=22C55E&center=true&vCenter=true&width=700&lines=Save+the+code.;Save+the+context.;Resume+the+flow." alt="DevCheckpoint Footer" />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=500&size=18&pause=1200&color=22C55E&center=true&vCenter=true&width=700&lines=Save+the+code.;Save+the+context.;Resume+the+flow." alt="DevCheckpoint footer animation" />
 
 <br/>
 
-**Built by CortexCrafters**
+### Built by CortexCrafters
+
+**Git saves your code. DevCheckpoint saves your context.**
 
 </div>
