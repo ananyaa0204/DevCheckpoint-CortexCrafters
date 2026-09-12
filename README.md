@@ -143,7 +143,7 @@ A checkpoint can preserve:
 
 ### Dashboard
 
-<img src="design/references/dashboard.png" width="900" alt="DevCheckpoint Dashboard"/>
+<img src="devcheckpoint/design/references/dashboard.png" width="900" alt="DevCheckpoint Dashboard" /> width="900" alt="DevCheckpoint Dashboard"/>
 
 <br/><br/>
 
