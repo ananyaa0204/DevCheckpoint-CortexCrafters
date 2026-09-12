@@ -1,0 +1,10 @@
+# Normalize line endings across Windows (dev) and macOS (testing)
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.docx binary
+*.pptx binary
+*.gguf binary

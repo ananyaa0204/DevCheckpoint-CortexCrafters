@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+
+# Tauri / Rust
+src-tauri/target/
+src-tauri/Cargo.lock
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Local database (never commit user data)
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+prisma/dev.db
+prisma/*.db
+data/
+
+# Ollama (never commit local model files)
+.ollama/
+*.gguf
+
+# Build output
+dist/
+build/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# TypeScript
+*.tsbuildinfo
+
+/src/generated/prisma
