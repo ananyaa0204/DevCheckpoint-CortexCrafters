@@ -1,16 +1,24 @@
 import fs from "node:fs";
 import path from "node:path";
 import { simpleGit } from "simple-git";
-import type { ChangedFileInfo, ChangeType, CommitInfo, GitContext, RepositoryValidation } from "./types";
+import { GIT_EXCLUDE_PATHSPECS, isExcludedPath } from "@/lib/security/patterns";
+import { mapChangeType, prioritizeAndTruncateFiles, truncateDiff } from "./context-utils";
+import type { ChangedFileInfo, CommitInfo, GitContext, RepositoryValidation } from "./types";
 
 /**
  * All Git access in this module is READ-ONLY (status, diff, log, rev-parse,
  * branch --show-current). Never call commit/push/pull/checkout/reset/merge/
  * rebase/stash/clean here — see AGENT_RULES.md §6 and SECURITY.md.
+ *
+ * Sensitive files (.env, keys, credentials, etc.) and dev-noise directories
+ * are excluded via Git pathspecs on every diff call below, so their content
+ * is never read off disk in the first place — not just filtered afterward.
  */
 
 const MAX_DIFF_CHARS = 20_000;
 const MAX_COMMITS = 5;
+const MAX_FILES = 200;
+const DIFF_PATHSPEC_ARGS = ["--", ".", ...GIT_EXCLUDE_PATHSPECS];
 
 export async function validateRepository(dirPath: string): Promise<RepositoryValidation> {
   let stat: fs.Stats;
@@ -36,23 +44,6 @@ export async function validateRepository(dirPath: string): Promise<RepositoryVal
   return { valid: true, repoRoot: normalizedRoot, name };
 }
 
-function mapChangeType(index: string, workingDir: string): ChangeType {
-  const code = index !== " " && index !== "?" ? index : workingDir;
-  switch (code) {
-    case "A":
-      return "added";
-    case "D":
-      return "deleted";
-    case "R":
-      return "renamed";
-    case "?":
-      return "untracked";
-    case "M":
-    default:
-      return "modified";
-  }
-}
-
 export async function getGitContext(repoRoot: string): Promise<GitContext> {
   const git = simpleGit(repoRoot);
 
@@ -60,11 +51,11 @@ export async function getGitContext(repoRoot: string): Promise<GitContext> {
     await Promise.all([
       git.status(),
       git.branch(),
-      git.diff().catch(() => ""),
-      git.diff(["--cached"]).catch(() => ""),
+      git.diff(DIFF_PATHSPEC_ARGS).catch(() => ""),
+      git.diff(["--cached", ...DIFF_PATHSPEC_ARGS]).catch(() => ""),
       git.log(["-n", String(MAX_COMMITS)]).catch(() => ({ all: [] })),
-      git.diffSummary().catch(() => ({ files: [] })),
-      git.diffSummary(["--cached"]).catch(() => ({ files: [] })),
+      git.diffSummary(DIFF_PATHSPEC_ARGS).catch(() => ({ files: [] })),
+      git.diffSummary(["--cached", ...DIFF_PATHSPEC_ARGS]).catch(() => ({ files: [] })),
     ]);
 
   const lineStats = new Map<string, { insertions: number; deletions: number }>();
@@ -80,17 +71,25 @@ export async function getGitContext(repoRoot: string): Promise<GitContext> {
     }
   }
 
-  const files: ChangedFileInfo[] = status.files.map((f) => ({
-    path: f.path,
-    changeType: mapChangeType(f.index, f.working_dir),
-    staged: f.index !== " " && f.index !== "?",
-    insertions: lineStats.get(f.path)?.insertions ?? 0,
-    deletions: lineStats.get(f.path)?.deletions ?? 0,
-  }));
+  const allFiles: ChangedFileInfo[] = status.files
+    .filter((f) => !isExcludedPath(f.path))
+    .map((f) => ({
+      path: f.path,
+      changeType: mapChangeType(f.index, f.working_dir),
+      staged: f.index !== " " && f.index !== "?",
+      insertions: lineStats.get(f.path)?.insertions ?? 0,
+      deletions: lineStats.get(f.path)?.deletions ?? 0,
+    }));
+
+  // Never let one huge repo make the app or an AI payload unresponsive
+  // (Milestone 12): staged files are prioritized before truncating.
+  const { files, truncated: filesTruncated, total: totalFilesChanged } = prioritizeAndTruncateFiles(
+    allFiles,
+    MAX_FILES
+  );
 
   const combinedDiff = [stagedDiff, workingDiff].filter(Boolean).join("\n");
-  const diffTruncated = combinedDiff.length > MAX_DIFF_CHARS;
-  const diff = diffTruncated ? combinedDiff.slice(0, MAX_DIFF_CHARS) : combinedDiff;
+  const { diff, truncated: diffTruncated } = truncateDiff(combinedDiff, MAX_DIFF_CHARS);
 
   const commits: CommitInfo[] = log.all.map((c) => ({
     hash: c.hash.slice(0, 7),
@@ -102,6 +101,8 @@ export async function getGitContext(repoRoot: string): Promise<GitContext> {
   return {
     branch: branchSummary.current || status.current || null,
     files,
+    filesTruncated,
+    totalFilesChanged,
     diff,
     diffTruncated,
     commits,
@@ -110,11 +111,15 @@ export async function getGitContext(repoRoot: string): Promise<GitContext> {
 }
 
 export async function getFileDiff(repoRoot: string, filePath: string): Promise<string> {
+  if (isExcludedPath(filePath)) {
+    return "[REDACTED] This file matches a sensitive-file pattern and its contents are never read.";
+  }
+
   const git = simpleGit(repoRoot);
   const [staged, working] = await Promise.all([
     git.diff(["--cached", "--", filePath]).catch(() => ""),
     git.diff(["--", filePath]).catch(() => ""),
   ]);
   const combined = [staged, working].filter(Boolean).join("\n");
-  return combined.length > MAX_DIFF_CHARS ? combined.slice(0, MAX_DIFF_CHARS) : combined;
+  return truncateDiff(combined, MAX_DIFF_CHARS).diff;
 }

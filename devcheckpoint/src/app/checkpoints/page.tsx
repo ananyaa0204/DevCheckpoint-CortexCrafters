@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { formatRelativeTime } from "@/lib/utils";
 import { listAllCheckpoints } from "@/lib/actions/checkpoints";
 
@@ -13,7 +13,9 @@ export default async function CheckpointsPage() {
     <AppShell>
       <div className="mb-6 flex items-start justify-between">
         <PageHeader title="Checkpoints" description="Save your progress. Pick up right where you left off." />
-        <Button render={<Link href="/checkpoints/new" />}>New Checkpoint</Button>
+        <Link href="/checkpoints/new" className={buttonVariants({ variant: "default" })}>
+          New Checkpoint
+        </Link>
       </div>
 
       {checkpoints.length === 0 ? (

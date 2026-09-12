@@ -42,16 +42,23 @@ model Task {
 
   project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
   checkpoints Checkpoint[]
+  commandLogs CommandLog[]
+  errorLogs   ErrorLog[]
+  handoffs    Handoff[]
 
   @@index([projectId, status])
   @@map("tasks")
 }
 
 // An immutable snapshot of task + Git context at a point in time.
-// No AI involvement yet: contextSnapshotJson is a deterministic summary
-// built from captured data, never invented. generationStatus mirrors the
-// enum from docs/DevCheckpoint_Backend_Schema_Document.docx so it is ready
-// for "success" / "failed" once AI generation is wired up later.
+//
+// contextSnapshotJson is always a deterministic summary built from
+// captured data — never AI-generated. aiSummaryJson is the separate,
+// clearly-distinguished Qwen output (task/changes/blocker/attempts/
+// importantFiles/nextStep), present only when generationStatus is
+// COMPLETED. generationStatus: PENDING | GENERATING | COMPLETED | FAILED
+// | SKIPPED (Ollama unavailable/model missing). A checkpoint is always
+// saved regardless of AI outcome — see AGENT_RULES.md / ARCHITECTURE.md.
 model Checkpoint {
   id                  String   @id @default(uuid())
   taskId              String   @map("task_id")
@@ -62,10 +69,15 @@ model Checkpoint {
   commitsJson         String?  @map("commits_json")
   developerNote       String?  @map("developer_note")
   contextSnapshotJson String   @map("context_snapshot_json")
-  generationStatus    String   @default("raw_only") @map("generation_status")
+  aiSummaryJson       String?  @map("ai_summary_json")
+  generationStatus    String   @default("SKIPPED") @map("generation_status")
+  generationError     String?  @map("generation_error")
 
-  task  Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  files ChangedFile[]
+  task        Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  files       ChangedFile[]
+  commandLogs CommandLog[]
+  errorLogs   ErrorLog[]
+  handoffs    Handoff[]
 
   @@index([taskId, createdAt])
   @@map("checkpoints")
@@ -82,6 +94,57 @@ model ChangedFile {
 
   @@index([checkpointId])
   @@map("checkpoint_files")
+}
+
+// A manually pasted command the developer wants remembered (no automatic
+// terminal hooking — see AGENT_RULES.md §16). Content is sanitized the
+// same way as any other captured context before it is ever persisted.
+model CommandLog {
+  id           String   @id @default(uuid())
+  taskId       String   @map("task_id")
+  checkpointId String?  @map("checkpoint_id")
+  command      String
+  exitStatus   Int?     @map("exit_status")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  task       Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  checkpoint Checkpoint? @relation(fields: [checkpointId], references: [id], onDelete: SetNull)
+
+  @@index([taskId, createdAt])
+  @@map("command_logs")
+}
+
+// A manually pasted error/traceback the developer wants remembered.
+model ErrorLog {
+  id           String   @id @default(uuid())
+  taskId       String   @map("task_id")
+  checkpointId String?  @map("checkpoint_id")
+  message      String
+  source       String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  task       Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  checkpoint Checkpoint? @relation(fields: [checkpointId], references: [id], onDelete: SetNull)
+
+  @@index([taskId, createdAt])
+  @@map("error_logs")
+}
+
+// A saved, shareable handoff generated from one checkpoint. Local-only —
+// there is no cloud sharing or team backend; "sharing" means exportable
+// Markdown text.
+model Handoff {
+  id           String   @id @default(uuid())
+  checkpointId String   @map("checkpoint_id")
+  taskId       String   @map("task_id")
+  markdown     String
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  checkpoint Checkpoint @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+  task       Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId, createdAt])
+  @@map("handoffs")
 }
 
 // Non-secret application preferences (Ollama endpoint, theme, etc.).

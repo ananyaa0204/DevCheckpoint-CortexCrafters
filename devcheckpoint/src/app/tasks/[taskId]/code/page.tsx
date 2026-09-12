@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
-import { PageHeader } from "@/components/layout/page-header";
+import { DetailHeader } from "@/components/layout/detail-header";
 import { ErrorState } from "@/components/shared/error-state";
 import { FileDiffExplorer } from "@/components/git/file-diff-explorer";
 import { getTask } from "@/lib/actions/tasks";
@@ -26,13 +25,17 @@ export default async function TaskCodeChangesPage({
 
   return (
     <AppShell>
-      <p className="mb-1 text-xs text-text-muted">
-        <Link href={`/tasks/${task.id}`} className="hover:underline">
-          {task.title}
-        </Link>{" "}
-        / Code Changes
-      </p>
-      <PageHeader title="Code Changes" description={`${task.project.name} · ${git?.branch ?? task.branch ?? ""}`} />
+      <DetailHeader
+        backHref={`/tasks/${task.id}`}
+        backLabel="Back to Task"
+        breadcrumbs={[
+          { label: "Tasks", href: "/tasks" },
+          { label: task.title, href: `/tasks/${task.id}` },
+          { label: "Code Changes" },
+        ]}
+        title="Code Changes"
+        description={`${task.project.name} · ${git?.branch ?? task.branch ?? ""}`}
+      />
 
       {gitError ? (
         <ErrorState title="Repository path is unavailable" message={gitError} />

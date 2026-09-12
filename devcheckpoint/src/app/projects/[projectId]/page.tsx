@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { FolderGit2 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { BackButton } from "@/components/layout/back-button";
 import { Badge } from "@/components/ui/badge";
 import { ErrorState } from "@/components/shared/error-state";
 import { ProjectWorkspace } from "@/components/projects/project-workspace";
@@ -30,7 +31,8 @@ export default async function ProjectWorkspacePage({
 
   return (
     <AppShell>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-2">
+        <BackButton href="/projects" label="Back to Projects" />
         <div className="flex items-center gap-3">
           <FolderGit2 className="size-6 text-primary" />
           <div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Search, FolderGit2, ListTodo, BookmarkCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +17,14 @@ export function GlobalSearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [open, setOpen] = useState(false);
+  const [isMac, setIsMac] = useState(false);
+  const [, startTransition] = useTransition();
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    startTransition(() => setIsMac(/Mac|iPhone|iPod|iPad/.test(navigator.userAgent)));
+  }, []);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -44,6 +51,21 @@ export function GlobalSearch() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+      if (e.key === "Escape") {
+        setOpen(false);
+        inputRef.current?.blur();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   function handleSelect(result: SearchResult) {
     setOpen(false);
     setQuery("");
@@ -55,14 +77,16 @@ export function GlobalSearch() {
       <div className="flex items-center gap-2 rounded-md border border-border bg-surface-2 px-3 py-2 text-sm text-text-muted">
         <Search className="size-4 shrink-0" />
         <input
+          ref={inputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
           placeholder="Search projects, tasks, checkpoints..."
+          aria-label="Search projects, tasks, and checkpoints"
           className="flex-1 truncate bg-transparent text-foreground outline-none placeholder:text-text-muted"
         />
         <Badge variant="secondary" className="shrink-0 font-mono text-[11px]">
-          Ctrl K
+          {isMac ? "⌘K" : "Ctrl K"}
         </Badge>
       </div>
 

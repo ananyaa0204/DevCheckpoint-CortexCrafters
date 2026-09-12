@@ -3,25 +3,34 @@ import { FolderGit2, ListTodo, BookmarkCheck, ArrowRight, Play } from "lucide-re
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { TaskStatusBadge } from "@/components/shared/status-badge";
 import { AddProjectDialog } from "@/components/projects/add-project-dialog";
-import { formatRelativeTime } from "@/lib/utils";
+import { formatRelativeTime, cn } from "@/lib/utils";
 import { listProjects, countActiveProjects } from "@/lib/actions/projects";
 import { countActiveTasks, getCurrentActiveTask } from "@/lib/actions/tasks";
 import { countCheckpoints, listAllCheckpoints } from "@/lib/actions/checkpoints";
 import { getProjectGitContext } from "@/lib/actions/git";
+import { getRecentActivity } from "@/lib/actions/activity";
 
 export default async function DashboardPage() {
-  const [activeProjects, activeTasks, savedCheckpoints, activeTask, recentCheckpoints, recentProjects] =
-    await Promise.all([
-      countActiveProjects(),
-      countActiveTasks(),
-      countCheckpoints(),
-      getCurrentActiveTask(),
-      listAllCheckpoints(),
-      listProjects(),
-    ]);
+  const [
+    activeProjects,
+    activeTasks,
+    savedCheckpoints,
+    activeTask,
+    recentCheckpoints,
+    recentProjects,
+    recentActivity,
+  ] = await Promise.all([
+    countActiveProjects(),
+    countActiveTasks(),
+    countCheckpoints(),
+    getCurrentActiveTask(),
+    listAllCheckpoints(),
+    listProjects(),
+    getRecentActivity(),
+  ]);
 
   const activeTaskGit = activeTask ? await getProjectGitContext(activeTask.projectId) : null;
   const latestCheckpointForTask = recentCheckpoints.find((c) => c.taskId === activeTask?.id);
@@ -59,9 +68,9 @@ export default async function DashboardPage() {
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-[15px] font-semibold">Current Task</h2>
             {activeTask && (
-              <Button size="sm" render={<Link href={`/tasks/${activeTask.id}/resume`} />}>
-                <Play /> Resume
-              </Button>
+              <Link href={`/tasks/${activeTask.id}/resume`} className={buttonVariants({ size: "sm" })}>
+                <Play /> Resume Last Task
+              </Link>
             )}
           </div>
 
@@ -75,6 +84,9 @@ export default async function DashboardPage() {
                 <p className="mt-0.5 text-sm text-text-muted">
                   {activeTask.project.name}
                   {activeTaskGit?.branch ? ` · ${activeTaskGit.branch}` : ""}
+                  {latestCheckpointForTask
+                    ? ` · last checkpoint ${formatRelativeTime(latestCheckpointForTask.createdAt)}`
+                    : ""}
                 </p>
               </div>
 
@@ -85,28 +97,38 @@ export default async function DashboardPage() {
               )}
 
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" render={<Link href={`/projects/${activeTask.projectId}`} />}>
+                <Link
+                  href={`/projects/${activeTask.projectId}`}
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
                   Open Project
-                </Button>
+                </Link>
                 {latestCheckpointForTask && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    render={<Link href={`/checkpoints/${latestCheckpointForTask.id}`} />}
+                  <Link
+                    href={`/checkpoints/${latestCheckpointForTask.id}`}
+                    className={buttonVariants({ variant: "outline", size: "sm" })}
                   >
                     View Last Checkpoint
-                  </Button>
+                  </Link>
                 )}
-                <Button variant="outline" size="sm" render={<Link href={`/checkpoints/new?taskId=${activeTask.id}`} />}>
+                <Link
+                  href={`/checkpoints/new?taskId=${activeTask.id}`}
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
                   Save Checkpoint
-                </Button>
+                </Link>
               </div>
             </div>
           ) : (
-            <EmptyState
-              title="No active task"
-              description="Start a task so DevCheckpoint knows what you're working on."
-            />
+            <div className="flex flex-col gap-3">
+              <EmptyState
+                title="No active task"
+                description="Start a task so DevCheckpoint knows what you're working on."
+              />
+              <Link href="/tasks/new" className={cn(buttonVariants({ size: "sm" }), "w-fit")}>
+                Start a Task
+              </Link>
+            </div>
           )}
         </div>
 
@@ -127,7 +149,34 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="rounded-lg border border-border bg-surface-1 p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-[15px] font-semibold">Recent Activity</h2>
+          </div>
+          {recentActivity.length === 0 ? (
+            <p className="text-sm text-text-muted">Nothing yet — add a project to get started.</p>
+          ) : (
+            <div className="flex flex-col">
+              {recentActivity.map((a) => (
+                <Link
+                  key={a.id}
+                  href={a.href}
+                  className="flex items-center justify-between gap-2 border-b border-border-subtle py-2.5 last:border-b-0 hover:opacity-80"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm text-foreground">{a.title}</p>
+                    <p className="truncate text-xs text-text-muted">{a.subtitle}</p>
+                  </div>
+                  <span className="shrink-0 text-xs text-text-muted">
+                    {formatRelativeTime(a.timestamp)}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="rounded-lg border border-border bg-surface-1 p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-[15px] font-semibold">Recent Checkpoints</h2>

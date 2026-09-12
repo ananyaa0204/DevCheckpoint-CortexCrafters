@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { TaskStatusBadge } from "@/components/shared/status-badge";
 import { formatRelativeTime } from "@/lib/utils";
 import { listAllTasks } from "@/lib/actions/tasks";
@@ -14,7 +14,9 @@ export default async function TasksPage() {
     <AppShell>
       <div className="mb-6 flex items-start justify-between">
         <PageHeader title="Tasks" description="What you're currently working on." />
-        <Button render={<Link href="/tasks/new" />}>New Task</Button>
+        <Link href="/tasks/new" className={buttonVariants({ variant: "default" })}>
+          New Task
+        </Link>
       </div>
 
       {tasks.length === 0 ? (

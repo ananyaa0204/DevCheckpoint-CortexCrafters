@@ -42,7 +42,13 @@ export function SaveCheckpointForm({
     startTransition(async () => {
       try {
         const checkpoint = await saveCheckpoint({ taskId, developerNote: note.trim() });
-        toast.success("Checkpoint saved");
+        if (checkpoint.generationStatus === "COMPLETED") {
+          toast.success("Checkpoint saved with an AI summary");
+        } else if (checkpoint.generationStatus === "SKIPPED") {
+          toast.success("Checkpoint saved. AI summary was skipped — you can generate it later.");
+        } else {
+          toast.warning("Checkpoint saved, but the AI summary failed. You can retry it later.");
+        }
         router.push(`/checkpoints/${checkpoint.id}`);
         router.refresh();
       } catch (err) {
@@ -66,6 +72,8 @@ export function SaveCheckpointForm({
         filesCount={git.files.length}
         isClean={git.isClean}
         lastCommitDate={git.commits[0]?.date ?? null}
+        filesTruncated={git.filesTruncated}
+        totalFilesChanged={git.totalFilesChanged}
       />
 
       <FileDiffExplorer projectId={projectId} files={git.files} />
@@ -78,7 +86,9 @@ export function SaveCheckpointForm({
           onChange={(e) => setNote(e.target.value)}
           placeholder="What's the current blocker? What have you tried? What's next?"
           rows={5}
+          maxLength={5000}
         />
+        <p className="text-right text-xs text-text-muted">{note.length}/5000</p>
       </div>
 
       <div className="flex justify-end gap-2">
@@ -87,7 +97,7 @@ export function SaveCheckpointForm({
         </Button>
         <Button onClick={handleSave} disabled={isPending}>
           {isPending ? <Loader2 className="animate-spin" /> : null}
-          Save Checkpoint
+          {isPending ? "Saving & generating summary…" : "Save Checkpoint"}
         </Button>
       </div>
     </div>

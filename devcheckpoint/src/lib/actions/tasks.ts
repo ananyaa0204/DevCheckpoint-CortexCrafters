@@ -1,8 +1,26 @@
 "use server";
 
 import { prisma } from "@/lib/db/prisma";
+import { startWatching, stopWatching } from "@/lib/watch/repo-watcher";
 
 export type TaskStatus = "ACTIVE" | "PAUSED" | "COMPLETED";
+
+/** Starts/stops lightweight file-activity tracking for a project based on
+ *  whether it currently has any ACTIVE task. Never scans outside the
+ *  project's own repository root. */
+async function syncProjectWatch(projectId: string): Promise<void> {
+  const [activeCount, project] = await Promise.all([
+    prisma.task.count({ where: { projectId, status: "ACTIVE" } }),
+    prisma.project.findUnique({ where: { id: projectId } }),
+  ]);
+  if (!project) return;
+
+  if (activeCount > 0) {
+    startWatching(project.id, project.repoRoot);
+  } else {
+    await stopWatching(project.id);
+  }
+}
 
 export async function createTask(input: {
   projectId: string;
@@ -11,7 +29,7 @@ export async function createTask(input: {
   branch?: string;
   notes?: string;
 }) {
-  return prisma.task.create({
+  const task = await prisma.task.create({
     data: {
       projectId: input.projectId,
       title: input.title,
@@ -21,16 +39,20 @@ export async function createTask(input: {
       status: "ACTIVE",
     },
   });
+  await syncProjectWatch(input.projectId);
+  return task;
 }
 
 export async function updateTaskStatus(id: string, status: TaskStatus) {
-  return prisma.task.update({
+  const task = await prisma.task.update({
     where: { id },
     data: {
       status,
       closedAt: status === "COMPLETED" ? new Date() : null,
     },
   });
+  await syncProjectWatch(task.projectId);
+  return task;
 }
 
 export async function updateTaskNotes(id: string, notes: string) {

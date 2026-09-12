@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { GitStatCards } from "@/components/git/git-stat-cards";
 import { CommitList } from "@/components/git/commit-list";
 import { FileDiffExplorer } from "@/components/git/file-diff-explorer";
+import { FileActivityPanel } from "@/components/projects/file-activity-panel";
 import { TaskStatusBadge } from "@/components/shared/status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import type { GitContext } from "@/lib/git/types";
@@ -43,6 +45,8 @@ export function ProjectWorkspace({
               filesCount={git.files.length}
               isClean={git.isClean}
               lastCommitDate={git.commits[0]?.date ?? null}
+              filesTruncated={git.filesTruncated}
+              totalFilesChanged={git.totalFilesChanged}
             />
 
             <FileDiffExplorer projectId={projectId} files={git.files} />
@@ -51,6 +55,8 @@ export function ProjectWorkspace({
               <h3 className="mb-2 text-sm font-semibold">Recent Commits</h3>
               <CommitList commits={git.commits} />
             </div>
+
+            <FileActivityPanel projectId={projectId} />
           </TabsContent>
 
           <TabsContent value="tasks" className="flex flex-col gap-3">
@@ -71,14 +77,12 @@ export function ProjectWorkspace({
                 </Link>
               ))
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-fit"
-              render={<Link href={`/tasks/new?projectId=${projectId}`} />}
+            <Link
+              href={`/tasks/new?projectId=${projectId}`}
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-fit")}
             >
               Start New Task
-            </Button>
+            </Link>
           </TabsContent>
         </Tabs>
       </div>
@@ -91,20 +95,26 @@ export function ProjectWorkspace({
               <p className="text-sm font-medium text-foreground">{activeTask.title}</p>
               {activeTask.notes && <p className="text-xs text-text-secondary">{activeTask.notes}</p>}
               <div className="mt-2 flex flex-col gap-2">
-                <Button size="sm" render={<Link href={`/checkpoints/new?taskId=${activeTask.id}`} />}>
+                <Link
+                  href={`/checkpoints/new?taskId=${activeTask.id}`}
+                  className={buttonVariants({ size: "sm" })}
+                >
                   Save Checkpoint
-                </Button>
-                <Button variant="outline" size="sm" render={<Link href={`/tasks/${activeTask.id}/resume`} />}>
+                </Link>
+                <Link
+                  href={`/tasks/${activeTask.id}/resume`}
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
                   Resume Task
-                </Button>
+                </Link>
               </div>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
               <p className="text-sm text-text-muted">No active task for this project.</p>
-              <Button size="sm" render={<Link href={`/tasks/new?projectId=${projectId}`} />}>
+              <Link href={`/tasks/new?projectId=${projectId}`} className={buttonVariants({ size: "sm" })}>
                 Start Task
-              </Button>
+              </Link>
             </div>
           )}
         </div>

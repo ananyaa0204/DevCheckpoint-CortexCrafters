@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
+import { BackButton } from "@/components/layout/back-button";
+import { DetailHeader } from "@/components/layout/detail-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { SaveCheckpointForm } from "@/components/checkpoints/save-checkpoint-form";
@@ -20,6 +22,7 @@ export default async function SaveCheckpointPage({
 
     return (
       <AppShell>
+        <BackButton href="/checkpoints" label="Back to Checkpoints" />
         <PageHeader title="Save Checkpoint" description="Choose a task to capture its current state." />
         {openTasks.length === 0 ? (
           <EmptyState
@@ -63,10 +66,17 @@ export default async function SaveCheckpointPage({
 
   return (
     <AppShell>
-      <p className="mb-1 text-xs text-text-muted">
-        {task.project.name} / {task.title}
-      </p>
-      <PageHeader title="Save Checkpoint" description="Capture your current state so you can resume it later." />
+      <DetailHeader
+        backHref={`/tasks/${task.id}`}
+        backLabel="Back to Task"
+        breadcrumbs={[
+          { label: "Tasks", href: "/tasks" },
+          { label: task.title, href: `/tasks/${task.id}` },
+          { label: "Save Checkpoint" },
+        ]}
+        title="Save Checkpoint"
+        description="Capture your current state so you can resume it later."
+      />
 
       {gitError ? (
         <ErrorState title="Repository path is unavailable" message={gitError} />

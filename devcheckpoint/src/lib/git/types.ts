@@ -18,6 +18,8 @@ export type CommitInfo = {
 export type GitContext = {
   branch: string | null;
   files: ChangedFileInfo[];
+  filesTruncated: boolean;
+  totalFilesChanged: number;
   diff: string;
   diffTruncated: boolean;
   commits: CommitInfo[];
